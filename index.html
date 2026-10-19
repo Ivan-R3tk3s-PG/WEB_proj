@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Fedezd fel a Naprendszer nyolc bolygóját egy interaktív, JavaScript által generált oldalon.">
+  <title>ORBITA – Egy világ odakint</title>
+</head>
+<body>
+<script>
+'use strict';
+
+// 1. A stíluslapot is JavaScript illeszti be.
+const stilus = document.createElement('style');
+stilus.textContent = `
+  :root { --paper:#f4f3ee; --ink:#1b211e; --muted:#686e68; --orange:#df562f; --line:#d8dbd2; }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; scroll-padding-top:30px; }
+  body { margin:0; color:var(--ink); background:var(--paper); font-family:Arial,Helvetica,sans-serif; }
+  button,a { -webkit-tap-highlight-color:transparent; }
+  button { font:inherit; cursor:pointer; }
+  a { color:inherit; text-decoration:none; }
+  button:focus-visible,a:focus-visible { outline:3px solid var(--orange); outline-offset:5px; }
+  .container { width:min(1240px,90%); margin:auto; }
+  .nav { display:flex; align-items:center; justify-content:space-between; gap:22px; padding:29px 0; }
+  .brand { font-weight:800; letter-spacing:-1.6px; font-size:29px; display:flex; align-items:center; gap:10px; }
+  .brand-icon { width:27px; height:27px; border:2px solid var(--ink); border-radius:50%; position:relative; transform:rotate(-30deg); }
+  .brand-icon:after { content:''; position:absolute; inset:8px -6px; border:2px solid var(--ink); border-radius:50%; }
+  .nav-links { display:flex; gap:30px; font-size:13px; }
+  .nav-links a:hover { color:var(--orange); }
+  .nav-label,.eyebrow,.section-label,.mono { font-family:'Courier New',monospace; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; }
+  .nav-label { display:flex; align-items:center; gap:8px; }
+  .dot { width:7px; height:7px; display:inline-block; background:var(--orange); border-radius:50%; }
+  .hero { min-height:590px; border-radius:12px; background:#101713; color:#f7f5ef; overflow:hidden; position:relative; display:grid; grid-template-columns:1.08fr 1fr; }
+  .hero-copy { padding:68px 0 58px 54px; position:relative; z-index:2; }
+  .eyebrow { display:flex; align-items:center; gap:12px; color:#b6bcb3; }
+  .hero h1 { font-size:clamp(48px,5.7vw,78px); letter-spacing:-4px; line-height:1.04; font-weight:500; margin:33px 0 24px; }
+  .hero h1 span { color:#b8c7a8; }
+  .hero-copy p { max-width:340px; color:#b1b9b1; font-size:15px; line-height:1.8; }
+  .cta { display:inline-flex; align-items:center; gap:28px; background:#dfe8cf; color:#172016; padding:17px 23px; border-radius:5px; font-size:13px; font-weight:700; margin-top:23px; transition:background .2s,transform .2s; }
+  .cta:hover { background:#eff5e6; transform:translateY(-2px); }
+  .space { min-height:530px; position:relative; align-self:stretch; isolation:isolate; }
+  .stars { position:absolute; inset:0; overflow:hidden; z-index:-2; }
+  .star { position:absolute; background:#e7ecd6; border-radius:50%; }
+  .orbit { position:absolute; top:50%; left:50%; border:1px solid #b1bba022; border-radius:50%; transform:translate(-50%,-50%) rotate(-28deg); width:590px; height:300px; }
+  .orbit.second { width:760px; height:450px; }
+  .hero-planet { position:absolute; width:clamp(240px,27vw,360px); aspect-ratio:1; border-radius:50%; left:47%; top:47%; transform:translate(-50%,-50%) rotate(-22deg); background:repeating-linear-gradient(0deg,#bba681 0%,#d2bb92 4%,#a18f72 7%,#c7b391 10%,#e0c9a0 12%); box-shadow:inset -75px -30px 80px #050b0bd9,inset 20px 10px 34px #fff2cd22,0 0 90px #b9ad8412; }
+  .hero-planet:after { content:''; position:absolute; width:180%; height:42%; border-radius:50%; border:28px solid #b6a98c70; outline:7px solid #ddcda13b; left:-40%; top:27%; transform:rotate(-12deg); box-shadow:0 0 0 5px #111713,0 0 0 15px #a2947659; }
+  .planet-caption { position:absolute; left:13%; bottom:57px; color:#aab4a8; font-size:11px; letter-spacing:1.4px; line-height:1.8; }
+  .planet-caption:before { content:''; display:block; width:50px; height:1px; background:#c7d1bd65; margin-bottom:14px; }
+  .hero-index { position:absolute; right:25px; top:25px; color:#84907f; font-size:10px; letter-spacing:2px; }
+  .intro-strip { display:grid; grid-template-columns:1.3fr repeat(3,1fr); gap:24px; padding:33px 0; border-bottom:1px solid var(--line); align-items:center; }
+  .strip-title { color:var(--muted); font-size:13px; line-height:1.7; }
+  .stat { border-left:1px solid var(--line); padding-left:30px; }
+  .stat strong { display:block; font-size:29px; font-weight:500; letter-spacing:-1px; }
+  .stat span { color:var(--muted); font-size:11px; display:block; margin-top:7px; }
+  .explore { padding-top:78px; }
+  .section-label { color:var(--orange); }
+  .section-heading { display:flex; justify-content:space-between; align-items:end; gap:30px; margin:16px 0 32px; }
+  h2 { font-size:clamp(30px,3.5vw,44px); letter-spacing:-1.8px; font-weight:500; margin:0; }
+  .section-heading p { color:var(--muted); font-size:13px; line-height:1.7; max-width:270px; margin:0; }
+  .explorer { display:grid; grid-template-columns:290px 1fr; border:1px solid var(--line); border-radius:9px; overflow:hidden; }
+  .planet-list { padding:14px; border-right:1px solid var(--line); }
+  .planet-button { width:100%; display:flex; align-items:center; gap:15px; padding:18px 17px; border:0; border-radius:5px; background:none; text-align:left; color:var(--ink); font-size:14px; transition:background .2s; }
+  .planet-button:hover { background:#e7e9e1; }
+  .planet-button[aria-pressed="true"] { background:#1b271f; color:#eef1e6; }
+  .planet-number { font-family:monospace; font-size:10px; opacity:.55; }
+  .mini-planet { width:18px; height:18px; flex-shrink:0; border-radius:50%; box-shadow:inset -5px -3px 7px #0006; }
+  .planet-arrow { margin-left:auto; }
+  .detail { display:grid; grid-template-columns:1fr 1fr; align-items:center; padding:45px 35px; min-height:470px; gap:35px; background:#eceee5; }
+  .planet-visual { position:relative; display:grid; place-items:center; min-height:260px; }
+  .visual-orbit { position:absolute; width:100%; aspect-ratio:1; border:1px solid #c9cfbf; border-radius:50%; }
+  .visual-orbit:before { content:'+'; position:absolute; top:49%; left:-5px; font-size:18px; color:#9aa48f; }
+  .big-planet { width:75%; aspect-ratio:1; border-radius:50%; box-shadow:inset -28px -12px 35px #0009,0 18px 35px #28351e15; position:relative; z-index:1; }
+  .big-planet.saturn:after { content:''; position:absolute; inset:34% -32%; border:14px solid #bcaa7a99; border-radius:50%; transform:rotate(-24deg); }
+  .detail-type { font:10px 'Courier New',monospace; letter-spacing:1.4px; color:#637255; text-transform:uppercase; }
+  .detail h3 { font-size:46px; font-weight:500; letter-spacing:-2px; margin:12px 0 16px; }
+  .detail-description { color:#626b5e; font-size:13px; line-height:1.85; min-height:96px; }
+  .planet-data { margin:25px 0 0; }
+  .data-row { display:flex; justify-content:space-between; gap:14px; border-top:1px solid #cfd4c6; padding:13px 0; font-size:11px; }
+  .data-row dt { color:#677260; }
+  .data-row dd { margin:0; font-weight:700; text-align:right; }
+  .fact { display:grid; grid-template-columns:1fr 1.8fr auto; gap:45px; align-items:center; margin:55px 0 75px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:36px 0; }
+  .fact h2 { font-size:27px; margin-top:12px; letter-spacing:-1px; }
+  .fact-text { font-size:17px; line-height:1.7; margin:0; max-width:560px; }
+  .next-fact { width:52px; height:52px; border:1px solid #bbc2b2; border-radius:50%; background:transparent; font-size:24px; transition:background .2s; }
+  .next-fact:hover { background:#dfe6d5; }
+  footer { display:flex; justify-content:space-between; gap:25px; padding-bottom:30px; color:var(--muted); font-size:11px; }
+  footer a:hover { color:var(--ink); }
+  @media(min-width:1300px) { .hero {min-height:620px;} }
+  @media(max-width:900px) { .nav-label {display:none;} .hero-copy {padding:45px 0 45px 35px;} .hero h1 {letter-spacing:-2.5px;} .hero {min-height:530px;} .space {min-height:480px;} .hero-planet {width:250px;} .explorer {grid-template-columns:230px 1fr;} .detail {grid-template-columns:1fr; padding:30px;} .planet-visual {min-height:210px;width:210px;margin:auto;} .detail-description {min-height:0;} .fact {gap:25px;} }
+  @media(max-width:600px) { .container {width:90%;} .nav {padding:22px 0;} .brand {font-size:24px;} .nav-links {gap:18px; font-size:11px;} .hero {grid-template-columns:1fr;} .hero-copy {padding:35px 28px 0;} .hero h1 {font-size:53px;margin:25px 0 18px;} .hero-copy p {font-size:13px;} .cta {margin-top:12px;} .space {min-height:350px;} .hero-planet {width:225px;left:53%;top:47%;} .planet-caption {left:24px;bottom:24px;font-size:9px;} .hero-index {font-size:8px;right:16px;top:16px;} .intro-strip {grid-template-columns:repeat(3,1fr);gap:10px;padding:25px 0;} .strip-title {grid-column:1/-1;margin-bottom:10px;} .stat {padding-left:13px;} .stat strong {font-size:23px;} .stat span {font-size:10px;line-height:1.5;} .explore {padding-top:50px;} .section-heading {display:block;} .section-heading p {margin-top:15px;max-width:320px;} .explorer {grid-template-columns:1fr;} .planet-list {display:grid;grid-template-columns:repeat(2,1fr);gap:3px;border-right:0;border-bottom:1px solid var(--line);padding:8px;} .planet-button {padding:12px 10px;font-size:12px;gap:9px;} .planet-number {font-size:9px;} .mini-planet {width:14px;height:14px;} .detail {padding:30px 24px;gap:24px;} .planet-visual {width:230px;min-height:230px;} .detail h3 {font-size:40px;} .fact {grid-template-columns:1fr auto;margin:35px 0 45px;gap:23px;} .fact>div {grid-column:1/-1;} .fact-text {font-size:15px;} footer {flex-direction:column;gap:14px;} }
+  @media(prefers-reduced-motion:reduce) { html {scroll-behavior:auto;} * {transition:none!important;} }
+`;
+document.head.appendChild(stilus);
+
+// 2. Segédfüggvény: elemet készít, szöveget ad hozzá, majd a szülőbe helyezi.
+function elem(tag, osztaly, szoveg, szulo) {
+  const ujElem = document.createElement(tag);
+  if (osztaly) ujElem.className = osztaly;
+  if (szoveg !== undefined && szoveg !== null) ujElem.textContent = szoveg;
+  if (szulo) szulo.appendChild(ujElem);
+  return ujElem;
+}
+function link(szoveg, cel, osztaly, szulo) {
+  const hivatkozas = elem('a', osztaly, szoveg, szulo);
+  hivatkozas.href = cel;
+  return hivatkozas;
+}
+
+// 3. Az adatokat tömbben tároljuk; ebből készül a bolygóválasztó.
+const bolygok = [
+  {nev:'Merkúr',tipus:'Kőzetbolygó',szin:'#a69b8b',hatter:'radial-gradient(circle at 30% 30%,#c6bcae,#8b8173 60%,#615e55)',leiras:'A Nap legközelebbi szomszédja. Kráterek borítják a felszínét, ritka légköre miatt pedig óriási a különbség a nappali és az éjszakai hőmérséklet között.',atmero:'4 879 km',tavolsag:'57,9 millió km',ev:'88 földi nap'},
+  {nev:'Vénusz',tipus:'Kőzetbolygó',szin:'#d7b67d',hatter:'repeating-linear-gradient(15deg,#d6b37c,#e1c695 12%,#b58c51 24%)',leiras:'Sűrű felhőtakaró rejti el a felszínét. Erős üvegházhatása miatt ez a Naprendszer legforróbb bolygója, annak ellenére, hogy nem ez van legközelebb a Naphoz.',atmero:'12 104 km',tavolsag:'108,2 millió km',ev:'225 földi nap'},
+  {nev:'Föld',tipus:'Kőzetbolygó · Az otthonunk',szin:'#5d97a0',hatter:'radial-gradient(ellipse at 34% 28%,#b6c7aa 0 9%,transparent 10%),radial-gradient(ellipse at 55% 45%,#7c9b6c 0 18%,transparent 19%),radial-gradient(ellipse at 37% 76%,#89a775 0 12%,transparent 13%),linear-gradient(120deg,#88b8c5,#2f647c)',leiras:'Az otthonunk, és az egyetlen bolygó, amelyen biztosan tudunk az élet létezéséről. Felszínének nagy részét óceánok borítják, légköre pedig védi az élővilágot.',atmero:'12 742 km',tavolsag:'149,6 millió km',ev:'365,25 földi nap'},
+  {nev:'Mars',tipus:'Kőzetbolygó',szin:'#bd6949',hatter:'radial-gradient(ellipse at 40% 35%,#d69368,transparent 40%),radial-gradient(circle at 65% 65%,#733c2b,transparent 25%),linear-gradient(30deg,#a24e34,#d5885d)',leiras:'A vörös bolygó színét a felszínén található vas-oxid adja. Itt emelkedik az Olympus Mons, a Naprendszer egyik legnagyobb vulkánja.',atmero:'6 779 km',tavolsag:'227,9 millió km',ev:'687 földi nap'},
+  {nev:'Jupiter',tipus:'Gázóriás',szin:'#b79d83',hatter:'repeating-linear-gradient(0deg,#bfa084 0%,#ead4b7 9%,#b17650 15%,#d6bea4 21%)',leiras:'A Naprendszer legnagyobb bolygója. Légkörében hatalmas viharok örvénylenek; a Nagy Vörös Folt egy több évszázada megfigyelt vihar.',atmero:'139 820 km',tavolsag:'778,6 millió km',ev:'11,86 földi év'},
+  {nev:'Szaturnusz',tipus:'Gázóriás',szin:'#c5b17f',hatter:'repeating-linear-gradient(0deg,#c5b17f 0%,#e3d1a0 10%,#a99670 15%,#d6c293 23%)',leiras:'Jégből és kőzettörmelékből álló gyűrűi teszik igazán felismerhetővé. Átlagos sűrűsége kisebb a vízénél: a bolygók között különleges könnyűsúlyú.',atmero:'116 460 km',tavolsag:'1,43 milliárd km',ev:'29,45 földi év'},
+  {nev:'Uránusz',tipus:'Jégóriás',szin:'#a6c9cb',hatter:'linear-gradient(15deg,#6fa5a8,#b9d9d7 65%,#d3e3db)',leiras:'Halvány kékeszöld színét a légkörében lévő metán adja. Forgástengelye annyira megdőlt, hogy a bolygó szinte az oldalán fekve kerüli meg a Napot.',atmero:'50 724 km',tavolsag:'2,87 milliárd km',ev:'84 földi év'},
+  {nev:'Neptunusz',tipus:'Jégóriás',szin:'#6287b8',hatter:'repeating-linear-gradient(-10deg,#608bb7,#82a9c6 15%,#4273a8 30%)',leiras:'A nyolc bolygó közül a legtávolabb kering a Naptól. Hideg, szeles világ, amelyet előbb matematikai számításokkal jósoltak meg, és csak utána figyeltek meg távcsővel.',atmero:'49 244 km',tavolsag:'4,50 milliárd km',ev:'164,8 földi év'}
+];
+
+// 4. Fejléc és nyitóképernyő.
+const keret = elem('div','container',null,document.body);
+const fejlec = elem('header','nav',null,keret);
+fejlec.id = 'teteje';
+const logo = link('', '#teteje', 'brand', fejlec);
+elem('span','brand-icon',null,logo).setAttribute('aria-hidden','true');
+elem('span',null,'ORBITA',logo);
+const menu = elem('nav','nav-links',null,fejlec);
+menu.setAttribute('aria-label','Fő navigáció');
+link('Bolygók','#bolygok',null,menu);
+link('Tudtad?','#tudtad',null,menu);
+const navCimke = elem('span','nav-label',null,fejlec);
+elem('span','dot',null,navCimke);
+elem('span',null,'Egy kis kíváncsiság. Végtelen tér.',navCimke);
+const fo = elem('main',null,null,keret);
+const hero = elem('section','hero',null,fo);
+hero.setAttribute('aria-labelledby','focim');
+const heroSzoveg = elem('div','hero-copy',null,hero);
+const felirat = elem('div','eyebrow',null,heroSzoveg);
+elem('span','dot',null,felirat);
+elem('span',null,'Útikalauz a Naprendszerhez',felirat);
+const focim = elem('h1',null,'Van egy egész',heroSzoveg);
+focim.id = 'focim';
+elem('br',null,null,focim);
+elem('span',null,'világ odakint.',focim);
+elem('p',null,'Nyolc bolygó. Számtalan felfedeznivaló. Indulj el egy rövid utazásra, és ismerd meg a kozmikus szomszédainkat.',heroSzoveg);
+const indul = link('Fedezd fel a bolygókat','#bolygok','cta',heroSzoveg);
+elem('span',null,'↗',indul).setAttribute('aria-hidden','true');
+const ur = elem('div','space',null,hero);
+ur.setAttribute('role','img');
+ur.setAttribute('aria-label','A Szaturnusz stilizált, gyűrűs ábrája csillagos háttér előtt. Az ábrák nem méretarányosak.');
+const csillagok = elem('div','stars',null,ur);
+for (let i=0;i<65;i++) {
+  const csillag = elem('span','star',null,csillagok);
+  // Rögzített képlet: minden megnyitáskor ugyanaz a csillagtérkép.
+  csillag.style.left = ((i*47+11)%100)+'%';
+  csillag.style.top = ((i*31+7)%100)+'%';
+  csillag.style.width = csillag.style.height = (i%3===0?2:1)+'px';
+  csillag.style.opacity = String(.2+(i%5)*.13);
+}
+elem('div','orbit',null,ur);
+elem('div','orbit second',null,ur);
+elem('div','hero-planet',null,ur);
+elem('span','hero-index mono','06 / SZATURNUSZ',ur);
+const kepalairas = elem('div','planet-caption mono','A GYŰRŰK URA',ur);
+elem('br',null,null,kepalairas);
+elem('span',null,'1,43 MILLIÁRD KM-RE A NAPTÓL',kepalairas);
+const sav = elem('section','intro-strip',null,fo);
+sav.setAttribute('aria-label','A Naprendszer számokban');
+elem('div','strip-title','A mi apró környékünk\naz univerzumban.',sav).style.whiteSpace='pre-line';
+[['8','felfedezésre váró bolygó'],['1','központi csillag: a Nap'],['4,6 mrd','éves történet']].forEach(adat=>{
+  const stat = elem('div','stat',null,sav);
+  elem('strong',null,adat[0],stat);
+  elem('span',null,adat[1],stat);
+});
+
+// 5. Interaktív bolygóválasztó. A kattintás ugyanazon az oldalon frissít.
+const felfedezo = elem('section','explore',null,fo);
+felfedezo.id = 'bolygok';
+elem('div','section-label','01 / Kozmikus szomszédaink',felfedezo);
+const cimSor = elem('div','section-heading',null,felfedezo);
+elem('h2',null,'Válassz egy világot.',cimSor);
+elem('p',null,'A sziklás felszínektől a jégóriásokig. Kattints egy bolygóra az induláshoz.',cimSor);
+const bongeszo = elem('div','explorer',null,felfedezo);
+const lista = elem('div','planet-list',null,bongeszo);
+lista.setAttribute('role','group');
+lista.setAttribute('aria-label','Bolygó kiválasztása');
+const reszletek = elem('article','detail',null,bongeszo);
+reszletek.id = 'bolygo-reszletek';
+reszletek.setAttribute('aria-live','polite');
+reszletek.setAttribute('aria-atomic','true');
+const gombok = [];
+function bolygoMutat(index) {
+  const bolygo = bolygok[index];
+  gombok.forEach((gomb,i)=>gomb.setAttribute('aria-pressed',String(i===index)));
+  reszletek.replaceChildren();
+  const abra = elem('div','planet-visual',null,reszletek);
+  abra.setAttribute('aria-hidden','true');
+  elem('div','visual-orbit',null,abra);
+  const gomb = elem('div','big-planet'+(index===5?' saturn':''),null,abra);
+  gomb.style.background=bolygo.hatter;
+  const szoveg = elem('div','detail-copy',null,reszletek);
+  elem('span','detail-type',String(index+1).padStart(2,'0')+' / '+bolygo.tipus,szoveg);
+  elem('h3',null,bolygo.nev,szoveg);
+  elem('p','detail-description',bolygo.leiras,szoveg);
+  const adatok = elem('dl','planet-data',null,szoveg);
+  [['Átlagos átmérő',bolygo.atmero],['Átlagos naptávolság',bolygo.tavolsag],['Egy év hossza',bolygo.ev]].forEach(adat=>{
+    const sor = elem('div','data-row',null,adatok);
+    elem('dt',null,adat[0],sor);
+    elem('dd',null,adat[1],sor);
+  });
+}
+bolygok.forEach((bolygo,index)=>{
+  const gomb = elem('button','planet-button',null,lista);
+  gomb.type = 'button';
+  gomb.setAttribute('aria-controls','bolygo-reszletek');
+  elem('span','planet-number',String(index+1).padStart(2,'0'),gomb);
+  const mini = elem('span','mini-planet',null,gomb);
+  mini.style.background=bolygo.szin;
+  mini.setAttribute('aria-hidden','true');
+  elem('span',null,bolygo.nev,gomb);
+  elem('span','planet-arrow','↗',gomb).setAttribute('aria-hidden','true');
+  gomb.addEventListener('click',()=>bolygoMutat(index));
+  gombok.push(gomb);
+});
+bolygoMutat(2);
+
+// 6. Lapozható érdekességek.
+const erdekessegek = [
+  'A Nap fénye nagyjából 8 perc 20 másodperc alatt ér el a Földre. Amikor a Napot látod, valójában a múltjába nézel.',
+  'A Vénusz egyszer lassabban fordul meg a tengelye körül, mint amennyi idő alatt megkerüli a Napot.',
+  'A Jupiter tömege nagyobb, mint a másik hét bolygóé együttvéve.',
+  'A Szaturnusz gyűrűi távolról összefüggőnek látszanak, valójában rengeteg különálló jég- és kőzetdarabból állnak.',
+  'A Mars napja csak kicsivel hosszabb a földinél: körülbelül 24 óra 39 perc.'
+];
+const tudtad = elem('section','fact',null,fo);
+tudtad.id = 'tudtad';
+const factCim = elem('div',null,null,tudtad);
+elem('div','section-label','02 / Egy perc csodálkozás',factCim);
+elem('h2',null,'Ezt tudtad?',factCim);
+const erdekessegSzoveg = elem('p','fact-text',erdekessegek[0],tudtad);
+erdekessegSzoveg.setAttribute('aria-live','polite');
+let aktualisErdekesseg = 0;
+const kovetkezo = elem('button','next-fact','→',tudtad);
+kovetkezo.type = 'button';
+kovetkezo.setAttribute('aria-label','Következő érdekesség');
+kovetkezo.addEventListener('click',()=>{
+  aktualisErdekesseg = (aktualisErdekesseg+1)%erdekessegek.length;
+  erdekessegSzoveg.textContent = erdekessegek[aktualisErdekesseg];
+});
+const lablec = elem('footer',null,null,keret);
+elem('span',null,'ORBITA © '+new Date().getFullYear()+' · A kíváncsiság visz előre.',lablec);
+elem('span',null,'Kerekített adatok · Szemléltető, nem méretarányos ábrák',lablec);
+link('Vissza a csillagokhoz ↑','#teteje',null,lablec);
+</script>
+</body>
+</html>
