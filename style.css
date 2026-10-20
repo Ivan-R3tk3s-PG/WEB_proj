@@ -1,0 +1,197 @@
+/* REDLINE - egyszerű autókatalógus */
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #101214;
+    color: #f5f5f5;
+}
+button, input { font: inherit; }
+button { cursor: pointer; }
+
+header { border-bottom: 1px solid #313338; }
+.fejlec-belso {
+    max-width: 1180px;
+    margin: auto;
+    padding: 24px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.logo {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 26px;
+    font-weight: bold;
+    font-style: italic;
+}
+.logo span { color: #f24e49; }
+.vissza {
+    background: none;
+    border: 1px solid #44474b;
+    color: #ddd;
+    padding: 11px 17px;
+    border-radius: 6px;
+}
+.vissza:hover { background: #292c30; }
+.doboz { max-width: 1180px; margin: auto; padding: 0 22px; }
+
+.bevezeto { padding: 65px 0 35px; }
+.alcim {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #d1a3a1;
+}
+h1 { font-size: clamp(42px, 6vw, 75px); letter-spacing: -2px; margin: 12px 0 16px; }
+.bevezeto h1 span { color: #f24e49; }
+.bevezeto > p:last-child { color: #aaa; font-size: 16px; }
+
+.markak { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.marka-kartya {
+    height: 390px;
+    border: 1px solid #36383c;
+    border-radius: 12px;
+    overflow: hidden;
+    text-align: left;
+    position: relative;
+    padding: 0;
+    color: white;
+    background: #24272a;
+}
+.marka-kartya img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.25s;
+}
+.marka-kartya:hover img { transform: scale(1.04); }
+.marka-kartya::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, #090a0bf2, transparent 75%);
+}
+.marka-szoveg { position: absolute; z-index: 1; bottom: 28px; left: 28px; }
+.marka-szoveg span { font-size: 11px; letter-spacing: 2px; color: #c8c8c8; }
+.marka-szoveg h2 { font-size: 38px; margin: 8px 0; }
+.marka-szoveg p { margin: 0; font-size: 14px; color: #ddd; }
+.also-szoveg { color: #999; text-align: center; margin: 30px 0 45px; }
+
+.katalogus-fejlec {
+    margin: 36px 0 32px;
+    height: 285px;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #1b1d20;
+}
+.katalogus-fejlec img { width: 100%; height: 100%; object-fit: cover; }
+.katalogus-fejlec::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, #101214e8, #10121426);
+}
+.katalogus-cim { position: absolute; z-index: 1; top: 50%; left: 35px; transform: translateY(-50%); }
+.katalogus-cim h1 { font-size: clamp(40px, 5vw, 60px); }
+.katalogus-cim > p:last-child { color: #ddd; }
+.eszközök { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.szurok { display: flex; gap: 9px; flex-wrap: wrap; }
+.szuro-gomb {
+    background: #222529;
+    color: #ddd;
+    border: 1px solid #383b40;
+    border-radius: 7px;
+    padding: 11px 18px;
+}
+.szuro-gomb.aktiv, .szuro-gomb:hover { background: #f24e49; border-color: #f24e49; color: white; }
+#kereses {
+    width: 260px;
+    min-width: 0;
+    padding: 11px 15px;
+    background: #222529;
+    border: 1px solid #383b40;
+    color: white;
+    border-radius: 7px;
+}
+.darabszam { color: #aaa; font-size: 13px; margin: 0 0 18px; }
+.autolista { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.auto-kartya {
+    background: #1b1e21;
+    border: 1px solid #313439;
+    border-radius: 12px;
+    overflow: hidden;
+}
+.auto-kartya > img { width: 100%; height: 205px; object-fit: cover; display: block; }
+.auto-szoveg { padding: 20px; }
+.auto-szoveg h2 { font-size: 26px; margin: 10px 0 5px; }
+.valtozat { color: #b6b6b6; margin: 0; font-size: 14px; }
+.adatok { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 22px 0; }
+.adatok div { border-right: 1px solid #373a3e; }
+.adatok div:last-child { border: none; }
+.adatok strong { display: block; font-size: 23px; }
+.adatok span { color: #a5a5a5; font-size: 11px; }
+.reszletek-gomb {
+    width: 100%;
+    background: #f24e49;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 13px;
+    font-weight: bold;
+}
+.reszletek-gomb:hover { background: #da3d38; }
+.ures { padding: 40px 0; color: #aaa; }
+.megjegyzes { color: #8b8e94; font-size: 12px; line-height: 1.6; margin: 28px 0; }
+footer { border-top: 1px solid #313338; text-align: center; padding: 24px; color: #8c8f95; font-size: 12px; }
+
+.adatlap {
+    padding: 0;
+    max-width: 650px;
+    width: calc(100% - 30px);
+    max-height: 90vh;
+    background: #1d2024;
+    color: white;
+    border: 1px solid #474b51;
+    border-radius: 12px;
+    overflow: auto;
+}
+.adatlap::backdrop { background: #000b; }
+.adatlap > img { display: block; width: 100%; height: 245px; object-fit: cover; }
+.adatlap-belso { padding: 26px; position: relative; }
+.adatlap h2 { font-size: 35px; margin: 0 0 7px; }
+.adatlap-belso > p:not(.valtozat) { line-height: 1.6; color: #ccc; margin: 22px 0; }
+.bezar {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    color: white;
+    background: #373a3f;
+    border: none;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+}
+.adatlap table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 15px 0 25px; }
+.adatlap td { padding: 13px 5px; border-bottom: 1px solid #3b3e43; }
+.adatlap td:first-child { color: #aaa; width: 40%; }
+.adatlap a { color: #ff847f; }
+
+@media (max-width: 820px) {
+    .autolista { grid-template-columns: repeat(2, 1fr); }
+    .marka-kartya { height: 315px; }
+    .eszközök { flex-wrap: wrap; }
+    #kereses { width: 100%; }
+}
+@media (max-width: 560px) {
+    .markak, .autolista { grid-template-columns: 1fr; }
+    .bevezeto { padding: 42px 0 28px; }
+    .marka-kartya { height: 290px; }
+    .katalogus-fejlec { height: 250px; }
+    .katalogus-cim { left: 20px; }
+    .katalogus-cim h1 { font-size: 40px; }
+    .vissza { font-size: 12px; padding: 10px; }
+}
